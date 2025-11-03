@@ -1,0 +1,6 @@
+ gcc new.c -o new -I /home/kolliparasurya/college/sem6/project1/samplecode/Noc_RL_MAP/HotSpot -L /home/kolliparasurya/college/sem6/project1/samplecode/Noc_RL_MAP/HotSpot -lhotspot -lm
+
+
+./new -c ./hotspot.config -p new_core3D.ptrace -steady_file avg.steady -model_type grid -detailed_3D on -grid_layer_file NoC_layer.lcf -grid_map_mode avg -grid_steady_file avg.grid.steady 
+cp avg.steady avg.init
+./new -c ./hotspot.config -init_file avg.init -p new_core3D.ptrace -grid_layer_file NoC_layer.lcf -model_type grid -detailed_3D on -o avg.ttrace -grid_transient_file avg.grid.ttrace -grid_map_mode avg

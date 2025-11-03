@@ -1,0 +1,21 @@
+#Steady State Temp.
+XY0 = [
+45	45	45	45	0
+45	45	45	45	0
+45	45	45	45	0
+45	45	45	45	0
+0	0	0	0	0
+]
+XY1 = [
+45	45	45	45	0
+45	45	45	45	0
+45	45	45	45	0
+45	45	45	45	0
+0	0	0	0	0
+]
+color_range = [25 65];
+figure(1)
+subplot(2,1,1), pcolor(XY0), axis off, caxis( color_range ), colormap(jet)
+subplot(2,1,2), pcolor(XY1), axis off, caxis( color_range ), colormap(jet)
+set(gcf, 'PaperPosition', [1 1 7 30]);
+print(gcf,'-djpeg','-r0','SS_routing-0_sel-0_BL_pir-0.010000_traffic-0.txt-10000.jpg')

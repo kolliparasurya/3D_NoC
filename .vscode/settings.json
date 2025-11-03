@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "atomic": "cpp",
+    "memory_resource": "cpp",
+    "fstream": "cpp",
+    "ostream": "cpp"
+  }
+}

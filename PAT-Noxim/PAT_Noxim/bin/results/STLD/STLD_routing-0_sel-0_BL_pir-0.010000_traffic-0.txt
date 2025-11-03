@@ -1,0 +1,39 @@
+XY0 = [
+2517	3200	3424	2480	0
+3304	3852	4218	3408	0
+3320	3980	4095	3336	0
+2304	3164	3192	2408	0
+0	0	0	0	0
+]
+XY1 = [
+2384	3376	3344	2432	0
+3072	4048	3866	2984	0
+2928	3982	3700	3044	0
+2552	3440	3456	2568	0
+0	0	0	0	0
+]
+color_range = [0 100000];
+figure(1)
+subplot(2,1,1), pcolor(XY0), axis off, caxis( color_range ), colormap(jet)
+subplot(2,1,2), pcolor(XY1), axis off, caxis( color_range ), colormap(jet)
+set(gcf, 'PaperPosition', [1 1 7 30]);
+print(gcf,'-djpeg','-r0','_routing-0_sel-0_BL_pir-0.010000_traffic-0.txt.jpg')
+total waiting time
+XY0 = [
+10700	13752	14864	10304	0
+13936	16834	18496	14832	0
+14080	17296	17700	14528	0
+9408	13600	13776	10288	0
+0	0	0	0	0
+]
+XY1 = [
+10288	14168	14360	10328	0
+12928	17480	16488	12547	0
+12656	16884	15944	12816	0
+10896	14444	14896	10752	0
+0	0	0	0	0
+]
+color_range = [0 100000];
+figure(1)
+subplot(2,1,1), pcolor(XY0), axis off, caxis( color_range ), colormap(jet)
+subplot(2,1,2), pcolor(XY1), axis off, caxis( color_range ), colormap(jet)
