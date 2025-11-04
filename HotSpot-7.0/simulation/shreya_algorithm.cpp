@@ -159,71 +159,71 @@ return mapping of each Tj to Ci
 
 void thermal_initiation()
 {
-    // const vector<string> args = {
-    //     "./a.out", "-c", "./hotspot.config", "-init_file", "avg.init", "-p",
-    //     "new_core3D.ptrace", "-grid_layer_file", "NoC_layer.lcf", "-model_type",
-    //     "grid", "-detailed_3D", "on", "-o", "avg.ttrace",
-    //     "-grid_transient_file", "avg.grid.ttrace", "-grid_map_mode", "avg"};
-    // std::vector<char *> argv;
-    // for (const auto &arg : args)
-    // {
-    //     // We use const_cast because argv expects `char*`, not `const char*`.
-    //     // This is safe if program_logic doesn't modify the arguments.
-    //     argv.push_back(const_cast<char *>(arg.c_str()));
-    // }
-    // argv.push_back(nullptr); // Null-terminate the argv array
-    // initiation(argv.size() - 1, argv.data());
+    const vector<string> args = {
+        "./a.out", "-c", "./hotspot.config", "-init_file", "avg.init", "-p",
+        "new_core3D.ptrace", "-grid_layer_file", "NoC_layer.lcf", "-model_type",
+        "grid", "-detailed_3D", "on", "-o", "avg.ttrace",
+        "-grid_transient_file", "avg.grid.ttrace", "-grid_map_mode", "avg"};
+    std::vector<char *> argv;
+    for (const auto &arg : args)
+    {
+        // We use const_cast because argv expects `char*`, not `const char*`.
+        // This is safe if program_logic doesn't modify the arguments.
+        argv.push_back(const_cast<char *>(arg.c_str()));
+    }
+    argv.push_back(nullptr); // Null-terminate the argv array
+    initiation(argv.size() - 1, argv.data());
 }
 
 void thermal_simulation(int *act)
 {
-    // simulation(act);
+    simulation(act);
 }
 
 void thermal_termination()
 {
-    // stop();
+    stop();
 }
 
 void get_active(int *act)
 {
-    // for (int i = 0; i < Gh; i++)
-    // {
-    //     for (int j = 0; j < Gl; j++)
-    //     {
-    //         for (int k = 0; k < Gw; k++)
-    //         {
-    //             int mf = 1;
-    //             if (NoC[k][j][i].isFree == -1)
-    //                 mf = 0;
-    //             for (int id = 0; id < NUNITS; id++)
-    //                 act[(i * Gw * Gl) + (j * Gw) + k + id] = mf;
-    //         }
-    //     }
-    // }
+    for (int i = 0; i < Gh; i++)
+    {
+        for (int j = 0; j < Gl; j++)
+        {
+            for (int k = 0; k < Gw; k++)
+            {
+                int mf = 1;
+                if (NoC[k][j][i].isFree == -1)
+                    mf = 0;
+                for (int id = 0; id < NUNITS; id++)
+                    act[(i * Gw * Gl) + (j * Gw) + k + id] = mf;
+            }
+        }
+    }
 }
 
 void temperature_update()
 {
-    // int *act;
-    // act = (int *)malloc(n * sizeof(int));
-    // if (act == NULL)
-    // {
-    //     std::cerr << "unable to allocate memory for 'act' array\n";
-    // }
-    // get_active(act);
-    // thermal_simulation(act);
+    int *act;
+    act = (int *)malloc(n * sizeof(int));
+    if (act == NULL)
+    {
+        std::cerr << "unable to allocate memory for 'act' array\n";
+    }
+    get_active(act);
+    thermal_simulation(act);
 
-    // for (int i = 0; i < Gh; i++)
-    // {
-    //     for (int j = 0; j < Gl; j++)
-    //     {
-    //         for (int k = 0; k < Gw; k++)
-    //         {
-    //             NoC[k][j][i].temperature = get_max_grid_temperature(i * 2, k, j);
-    //         }
-    //     }
-    // }
+    for (int i = 0; i < Gh; i++)
+    {
+        for (int j = 0; j < Gl; j++)
+        {
+            for (int k = 0; k < Gw; k++)
+            {
+                NoC[k][j][i].temperature = get_max_grid_temperature(i * 2, k, j);
+            }
+        }
+    }
 }
 
 double ERT(int a, double v, int nol, int md)
