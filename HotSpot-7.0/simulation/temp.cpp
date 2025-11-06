@@ -72,7 +72,6 @@ int stry = 0;
 int strz = 0;
 int removed_app_id;
 int removed_app_death_time;
-int total_sim_time = 0;
 vector<vector<int>> emptySingleCores;
 vector<pair<Core *, Core *>> brickVector;
 vector<pair<int, int>> appsLoc;
@@ -165,7 +164,7 @@ void update_mvtasks(Core *node1, Core *node2)
     task_timestamp[buf].push_back({node2->num_time_task, node2->x + (node2->y * Gw) + (node2->z * Gw * Gl), jump, node1->time_of_death});
 
     if (buf / 10000 == 11)
-        cout << "udpate " << node1->time_of_death << " " << removed_app_death_time << endl;
+        cout << "zst " << node1->time_of_death << " " << removed_app_death_time << endl;
 
     node2->time_of_death = node1->time_of_death;
     node1->time_of_death = removed_app_death_time;
@@ -486,12 +485,9 @@ int mapping_application(vector<pair<int, int>> pairs, int appId, Application app
             brickVector[i].first->wareoff_const += app.tasks[pairs[x].first];
 
             brickVector[i].first->num_time_task = 0;
-            // int jump = brickVector[i].first->time_of_death;
-            int jump = total_sim_time;
-            brickVector[i].first->time_of_death = jump + app.runtime;
+            int jump = brickVector[i].first->time_of_death;
+            brickVector[i].first->time_of_death += app.runtime;
             int buf = cnv_task_buf(brickVector[i].first->task_no);
-            // if (app.id == 11)
-            // cout << "11th " << jump << " " << brickVector[i].first->time_of_death << endl;
             task_timestamp[buf].push_back({0, brickVector[i].first->x + (brickVector[i].first->y * Gw) + (brickVector[i].first->z * Gw * Gl), jump, brickVector[i].first->time_of_death});
             if (pairs[x].second != -1)
             {
@@ -500,12 +496,9 @@ int mapping_application(vector<pair<int, int>> pairs, int appId, Application app
                 brickVector[i].second->wareoff_const += app.tasks[pairs[x].second];
 
                 brickVector[i].second->num_time_task = 0;
-                // int jump = brickVector[i].second->time_of_death;
-                int jump = total_sim_time;
-                brickVector[i].second->time_of_death = jump + app.runtime;
+                int jump = brickVector[i].second->time_of_death;
+                brickVector[i].second->time_of_death += app.runtime;
                 int buf = cnv_task_buf(brickVector[i].second->task_no);
-                // if (app.id == 11)
-                //     cout << "11th " << jump << " " << brickVector[i].second->time_of_death << endl;
                 task_timestamp[buf].push_back({0, brickVector[i].second->x + (brickVector[i].second->y * Gw) + (brickVector[i].second->z * Gw * Gl), jump, brickVector[i].second->time_of_death});
             }
         }
@@ -529,74 +522,74 @@ void migrate_tasks(Core *overheating_core)
 //=========================================================================================
 void thermal_initiation()
 {
-    const vector<string> args = {
-        "./a.out", "-c", "./hotspot.config", "-init_file", "avg.init", "-p",
-        "new_core3D.ptrace", "-grid_layer_file", "NoC_layer.lcf", "-model_type",
-        "grid", "-detailed_3D", "on", "-o", "avg.ttrace",
-        "-grid_transient_file", "avg.grid.ttrace", "-grid_map_mode", "avg"};
-    std::vector<char *> argv;
-    for (const auto &arg : args)
-    {
-        // We use const_cast because argv expects `char*`, not `const char*`.
-        // This is safe if program_logic doesn't modify the arguments.
-        argv.push_back(const_cast<char *>(arg.c_str()));
-    }
-    argv.push_back(nullptr); // Null-terminate the argv array
-    initiation(argv.size() - 1, argv.data());
+    // const vector<string> args = {
+    //     "./a.out", "-c", "./hotspot.config", "-init_file", "avg.init", "-p",
+    //     "new_core3D.ptrace", "-grid_layer_file", "NoC_layer.lcf", "-model_type",
+    //     "grid", "-detailed_3D", "on", "-o", "avg.ttrace",
+    //     "-grid_transient_file", "avg.grid.ttrace", "-grid_map_mode", "avg"};
+    // std::vector<char *> argv;
+    // for (const auto &arg : args)
+    // {
+    //     // We use const_cast because argv expects `char*`, not `const char*`.
+    //     // This is safe if program_logic doesn't modify the arguments.
+    //     argv.push_back(const_cast<char *>(arg.c_str()));
+    // }
+    // argv.push_back(nullptr); // Null-terminate the argv array
+    // initiation(argv.size() - 1, argv.data());
 }
 
 void thermal_simulation(int *act)
 {
-    simulation(act);
+    // simulation(act);
 }
 
 void thermal_termination()
 {
-    stop();
+    // stop();
 }
 void get_active(int *act)
 {
-    for (int i = 0; i < Gh; i++)
-    {
-        for (int j = 0; j < Gl; j++)
-        {
-            for (int k = 0; k < Gw; k++)
-            {
-                int mf = 1;
-                if (mesh[k][j][i].isFree)
-                    mf = 0;
-                for (int id = 0; id < NUNITS; id++)
-                    act[(i * Gw * Gl) + (j * Gw) + k + id] = mf;
-            }
-        }
-    }
+    // for (int i = 0; i < Gh; i++)
+    // {
+    //     for (int j = 0; j < Gl; j++)
+    //     {
+    //         for (int k = 0; k < Gw; k++)
+    //         {
+    //             int mf = 1;
+    //             if (mesh[k][j][i].isFree)
+    //                 mf = 0;
+    //             for (int id = 0; id < NUNITS; id++)
+    //                 act[(i * Gw * Gl) + (j * Gw) + k + id] = mf;
+    //         }
+    //     }
+    // }
 }
 
 void Thermal_block()
 {
-    int *act;
-    act = (int *)malloc(n * sizeof(int));
-    if (act == NULL)
-    {
-        std::cerr << "unable to allocate memory for 'act' array\n";
-    }
-    get_active(act);
-    thermal_simulation(act);
+    // int *act;
+    // act = (int *)malloc(n * sizeof(int));
+    // if (act == NULL)
+    // {
+    //     std::cerr << "unable to allocate memory for 'act' array\n";
+    // }
+    // get_active(act);
+    // thermal_simulation(act);
 
-    for (int i = 0; i < Gh; i++)
-    {
-        for (int j = 0; j < Gl; j++)
-        {
-            for (int k = 0; k < Gw; k++)
-            {
-                mesh[k][j][i].temp = get_max_grid_temperature(i * 2, k, j);
-                if (mesh[k][j][i].temp >= TEMP_THRESHOLD)
-                    mesh[k][j][i].isnotBlocked = 0;
-                else
-                    mesh[k][j][i].isnotBlocked = 1;
-            }
-        }
-    }
+    // for (int i = 0; i < Gh; i++)
+    // {
+    //     for (int j = 0; j < Gl; j++)
+    //     {
+    //         for (int k = 0; k < Gw; k++)
+    //         {
+    //             mesh[k][j][i].temp = get_max_grid_temperature(i * 2, k, j);
+    //             if (mesh[k][j][i].temp >= TEMP_THRESHOLD)
+    //                 mesh[k][j][i].isnotBlocked = 0;
+    //             else
+    //                 mesh[k][j][i].isnotBlocked = 1;
+    //         }
+    //     }
+    // }
 }
 void free_mesh()
 {
@@ -613,18 +606,15 @@ void free_mesh()
                 {
                     if (min_element.first > mesh[k][j][i].time_of_death)
                     {
-                        std::string int_part = mesh[k][j][i].task_no.substr(0, mesh[k][j][i].task_no.find('.'));
-                        int app_id = stoi(int_part) - 1;
-                        // min_element.first = mesh[k][j][i].time_of_death
                         min_element.first = mesh[k][j][i].time_of_death;
+                        std::string int_part = mesh[k][j][i].task_no.substr(0, mesh[k][j][i].task_no.find('.'));
+                        int app_id = stoi(int_part);
                         min_element.second = app_id;
                     }
                 }
             }
         }
     }
-    // cout << "app " << min_element.second << " " << min_element.first << endl;
-    total_sim_time = min_element.first;
     for (int i = 0; i < Gh; i++)
     {
         for (int j = 0; j < Gl; j++)
@@ -634,11 +624,11 @@ void free_mesh()
                 if (mesh[k][j][i].task_no != "")
                 {
                     std::string int_part = mesh[k][j][i].task_no.substr(0, mesh[k][j][i].task_no.find('.'));
-                    int app_id = stoi(int_part) - 1;
+                    int app_id = stoi(int_part);
                     if (min_element.second == app_id)
                     {
                         removed_app_id = app_id;
-                        removed_app_death_time = total_sim_time;
+                        removed_app_death_time = mesh[k][j][i].time_of_death;
                         mesh[k][j][i].isFree = 1;
                         mesh[k][j][i].task_no = "";
                     }
@@ -1100,3 +1090,4 @@ int main(int argc, char *argv[])
 //     }
 //     mapFile.close();
 // }
+
