@@ -3,8 +3,8 @@
 
 #include "util.h"
 
-#define MAX_UNITS		8192
-#define MAX_MOVES		16
+#define MAX_UNITS		1048576//8192
+#define MAX_MOVES		1024//16
 
 /* types of cuts	*/
 #define CUT_NONE		-1

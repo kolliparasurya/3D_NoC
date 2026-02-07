@@ -19,9 +19,9 @@
 #define DEFAULT_VERBOSE_MODE                    VERBOSE_OFF
 #define DEFAULT_TRACE_MODE                      false
 #define DEFAULT_TRACE_FILENAME                  ""
-#define DEFAULT_MESH_DIM_X                      6//4
-#define DEFAULT_MESH_DIM_Y                      6//4
-#define DEFAULT_MESH_DIM_Z                      6//2	//Default Number MESH_DIM_Z
+#define DEFAULT_MESH_DIM_X                      16//4
+#define DEFAULT_MESH_DIM_Y                      8//4
+#define DEFAULT_MESH_DIM_Z                      4//2	//Default Number MESH_DIM_Z
 #define DEFAULT_NUM_VC                          1	//Default VC Number
 #define DEFAULT_BUFFER_DEPTH                    8
 #define DEFAULT_MAX_PACKET_SIZE                 8
@@ -32,7 +32,7 @@
 #define DEFAULT_PACKET_INJECTION_RATE           0.01
 #define DEFAULT_PROBABILITY_OF_RETRANSMISSION   0.01
 #define DEFAULT_TRAFFIC_DISTRIBUTION            TRAFFIC_TABLE_BASED//TRAFFIC_RANDOM
-#define DEFAULT_TRAFFIC_TABLE_FILENAME          "test_traffic.txt"
+#define DEFAULT_TRAFFIC_TABLE_FILENAME          "traffic.txt"
 #define DEFAULT_RESET_TIME                      1
 #define DEFAULT_SIMULATION_TIME                 10000
 #define DEFAULT_STATS_WARM_UP_TIME              DEFAULT_RESET_TIME

@@ -5,7 +5,7 @@
 # NOTE FOR NOXIM USERS: before running "make" you just have to modify
 # the following variable to point to your SystemC installation path
 #
-SYSTEMC = /home/kolliparasurya/college/sem6/project1/samplecode/Noc_RL_MAP/systemc-3.0.1
+SYSTEMC = ../../../systemc-3.0.1
 #
 # That's all for you!!!
 

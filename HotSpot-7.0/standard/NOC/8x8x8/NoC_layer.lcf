@@ -1,0 +1,171 @@
+# Lines starting with # are used for commenting
+# Blank lines are also ignored
+
+# File Format:
+# <Layer Number>
+# <Lateral heat flow Y/N?>
+# <Power Dissipation Y/N?>
+# <Specific heat capacity in J/(m^3K)>
+# <Resistivity in (m-K)/W>
+# <Thickness in m>
+# <floorplan file>
+
+# Layer 0: Silicon
+0
+Y
+Y
+1.75e6
+0.01
+0.00015
+../NOC/8x8x8/new_core_layer0.flp
+#new_core_layer0.flp
+
+# Layer 1: TIM
+1
+Y
+N
+4e6
+0.25
+2.0e-05
+../NOC/8x8x8/new_timtsv0.flp
+#new_timtsv0.flp
+
+# Layer 2: Silicon
+2
+Y
+Y
+1.75e6
+0.01
+0.00015
+../NOC/8x8x8/new_core_layer1.flp
+#new_core_layer1.flp
+
+# Layer 3: TIM
+3
+Y
+N
+4e6
+0.25
+2.0e-05
+../NOC/8x8x8/new_timtsv1.flp
+#new_timtsv1.flp
+
+# Layer 4: Silicon
+4
+Y
+Y
+1.75e6
+0.01
+0.00015
+../NOC/8x8x8/new_core_layer2.flp
+#new_core_layer2.flp
+
+# Layer 5: TIM
+5
+Y
+N
+4e6
+0.25
+2.0e-05
+../NOC/8x8x8/new_timtsv2.flp
+#new_timtsv2.flp
+
+# Layer 6: Silicon
+6
+Y
+Y
+1.75e6
+0.01
+0.00015
+../NOC/8x8x8/new_core_layer3.flp
+#new_core_layer3.flp
+
+# Layer 7: TIM
+7
+Y
+N
+4e6
+0.25
+2.0e-05
+../NOC/8x8x8/new_timtsv3.flp
+#new_timtsv3.flp
+
+# Layer 8: Silicon
+8
+Y
+Y
+1.75e6
+0.01
+0.00015
+../NOC/8x8x8/new_core_layer4.flp
+#new_core_layer4.flp
+
+# Layer 9: TIM
+9
+Y
+N
+4e6
+0.25
+2.0e-05
+../NOC/8x8x8/new_timtsv4.flp
+#new_timtsv4.flp
+
+# Layer 10: Silicon
+10
+Y
+Y
+1.75e6
+0.01
+0.00015
+../NOC/8x8x8/new_core_layer5.flp
+#new_core_layer5.flp
+
+# Layer 11: TIM
+11
+Y
+N
+4e6
+0.25
+2.0e-05
+../NOC/8x8x8/new_timtsv5.flp
+#new_timtsv5.flp
+
+# Layer 12: Silicon
+12
+Y
+Y
+1.75e6
+0.01
+0.00015
+../NOC/8x8x8/new_core_layer6.flp
+#new_core_layer6.flp
+
+# Layer 13: TIM
+13
+Y
+N
+4e6
+0.25
+2.0e-05
+../NOC/8x8x8/new_timtsv6.flp
+#new_timtsv6.flp
+
+# Layer 14: Silicon
+14
+Y
+Y
+1.75e6
+0.01
+0.00015
+../NOC/8x8x8/new_core_layer7.flp
+#new_core_layer7.flp
+
+# Layer 15: TIM (top layer)
+15
+Y
+N
+4e6
+0.25
+2.0e-05
+../NOC/8x8x8/new_TIM_layer.flp
+#new_TIM_layer.flp

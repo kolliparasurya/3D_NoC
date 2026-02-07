@@ -26,7 +26,7 @@
 #define RAND_SEED		1500450271
 
 #define STR_SIZE		512
-#define LINE_SIZE		65536
+#define LINE_SIZE		 262144 //65536
 #define MAX_ENTRIES		512
 
 int eq(double x, double y);

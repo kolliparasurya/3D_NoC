@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding='utf-8'?>
+<graph>
+  <nodes>
+    <node title="t0_0" label="t0_0 (10)"/>
+    <node title="t0_1" label="t0_1 (12)"/>
+    <node title="t0_2" label="t0_2 (15)"/>
+    <node title="t0_3" label="t0_3 (9)"/>
+    <node title="t0_4" label="t0_4 (8)"/>
+    <node title="t0_5" label="t0_5 (7)"/>
+    <node title="t0_6" label="t0_6 (11)"/>
+    <node title="t0_7" label="t0_7 (13)"/>
+    <node title="t0_8" label="t0_8 (14)"/>
+    <node title="t0_9" label="t0_9 (6)"/>
+  </nodes>
+  <edges>
+    <edge sourcename="t0_0" targetname="t0_1" label="(64)"/>
+    <edge sourcename="t0_1" targetname="t0_2" label="(128)"/>
+    <edge sourcename="t0_0" targetname="t0_3" label="(128)"/>
+    <edge sourcename="t0_3" targetname="t0_5" label="(96)"/>
+    <edge sourcename="t0_5" targetname="t0_6" label="(96)"/>
+    <edge sourcename="t0_6" targetname="t0_7" label="(96)"/>
+    <edge sourcename="t0_7" targetname="t0_8" label="(96)"/>
+    <edge sourcename="t0_8" targetname="t0_9" label="(64)"/>
+  </edges>
+</graph>
+<!-- MWD task graph -->

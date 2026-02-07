@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<graph>
+  <nodes>
+    <node title="t2_0" label="t2_0 (10)"/>
+    <node title="t2_1" label="t2_1 (11)"/>
+    <node title="t2_2" label="t2_2 (13)"/>
+    <node title="t2_3" label="t2_3 (12)"/>
+    <node title="t2_4" label="t2_4 (9)"/>
+    <node title="t2_5" label="t2_5 (8)"/>
+    <node title="t2_6" label="t2_6 (14)"/>
+    <node title="t2_7" label="t2_7 (15)"/>
+    <node title="t2_8" label="t2_8 (12)"/>
+    <node title="t2_9" label="t2_9 (11)"/>
+    <node title="t2_10" label="t2_10 (9)"/>
+    <node title="t2_11" label="t2_11 (10)"/>
+    <node title="t2_12" label="t2_12 (8)"/>
+    <node title="t2_13" label="t2_13 (13)"/>
+    <node title="t2_14" label="t2_14 (7)"/>
+    <node title="t2_15" label="t2_15 (12)"/>
+    <node title="t2_16" label="t2_16 (9)"/>
+    <node title="t2_17" label="t2_17 (10)"/>
+    <node title="t2_18" label="t2_18 (13)"/>
+    <node title="t2_19" label="t2_19 (8)"/>
+    <node title="t2_20" label="t2_20 (12)"/>
+    <node title="t2_21" label="t2_21 (11)"/>
+    <node title="t2_22" label="t2_22 (14)"/>
+    <node title="t2_23" label="t2_23 (10)"/>
+    <node title="t2_24" label="t2_24 (13)"/>
+    <node title="t2_25" label="t2_25 (9)"/>
+    <node title="t2_26" label="t2_26 (10)"/>
+    <node title="t2_27" label="t2_27 (11)"/>
+    <node title="t2_28" label="t2_28 (13)"/>
+    <node title="t2_29" label="t2_29 (12)"/>
+    <node title="t2_30" label="t2_30 (10)"/>
+    <node title="t2_31" label="t2_31 (14)"/>
+  </nodes>
+  <edges>
+    <edge sourcename="t2_0" targetname="t2_1" label="(70)"/>
+    <edge sourcename="t2_1" targetname="t2_2" label="(362)"/>
+    <edge sourcename="t2_2" targetname="t2_3" label="(362)"/>
+    <edge sourcename="t2_3" targetname="t2_4" label="(49)"/>
+    <edge sourcename="t2_0" targetname="t2_5" label="(353)"/>
+    <edge sourcename="t2_5" targetname="t2_6" label="(357)"/>
+    <edge sourcename="t2_6" targetname="t2_7" label="(94)"/>
+    <edge sourcename="t2_7" targetname="t2_8" label="(500)"/>
+    <edge sourcename="t2_8" targetname="t2_9" label="(313)"/>
+    <edge sourcename="t2_9" targetname="t2_10" label="(16)"/>
+    <edge sourcename="t2_10" targetname="t2_11" label="(157)"/>
+    <edge sourcename="t2_11" targetname="t2_12" label="(16)"/>
+    <edge sourcename="t2_12" targetname="t2_13" label="(16)"/>
+    <edge sourcename="t2_13" targetname="t2_14" label="(16)"/>
+    <edge sourcename="t2_14" targetname="t2_15" label="(157)"/>
+    <edge sourcename="t2_15" targetname="t2_21" label="(353)"/>
+    <edge sourcename="t2_21" targetname="t2_22" label="(357)"/>
+    <edge sourcename="t2_22" targetname="t2_23" label="(94)"/>
+    <edge sourcename="t2_23" targetname="t2_24" label="(500)"/>
+    <edge sourcename="t2_24" targetname="t2_25" label="(313)"/>
+    <edge sourcename="t2_25" targetname="t2_26" label="(16)"/>
+    <edge sourcename="t2_26" targetname="t2_27" label="(157)"/>
+    <edge sourcename="t2_27" targetname="t2_28" label="(540)"/>
+    <edge sourcename="t2_15" targetname="t2_30" label="(126)"/>
+    <edge sourcename="t2_30" targetname="t2_31" label="(540)"/>
+  </edges>
+</graph>

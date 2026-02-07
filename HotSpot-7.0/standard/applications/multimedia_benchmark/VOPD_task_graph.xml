@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<graph>
+  <nodes>
+    <node title="t1_0" label="t1_0 (10)"/>
+    <node title="t1_1" label="t1_1 (9)"/>
+    <node title="t1_2" label="t1_2 (12)"/>
+    <node title="t1_3" label="t1_3 (14)"/>
+    <node title="t1_4" label="t1_4 (8)"/>
+    <node title="t1_5" label="t1_5 (11)"/>
+    <node title="t1_6" label="t1_6 (13)"/>
+    <node title="t1_7" label="t1_7 (10)"/>
+    <node title="t1_8" label="t1_8 (12)"/>
+    <node title="t1_9" label="t1_9 (9)"/>
+    <node title="t1_10" label="t1_10 (7)"/>
+    <node title="t1_11" label="t1_11 (11)"/>
+    <node title="t1_12" label="t1_12 (8)"/>
+    <node title="t1_13" label="t1_13 (14)"/>
+    <node title="t1_14" label="t1_14 (6)"/>
+    <node title="t1_15" label="t1_15 (10)"/>
+  </nodes>
+  <edges>
+    <edge sourcename="t1_0" targetname="t1_1" label="(70)"/>
+    <edge sourcename="t1_1" targetname="t1_2" label="(362)"/>
+    <edge sourcename="t1_2" targetname="t1_3" label="(362)"/>
+    <edge sourcename="t1_3" targetname="t1_4" label="(49)"/>
+    <edge sourcename="t1_0" targetname="t1_5" label="(353)"/>
+    <edge sourcename="t1_5" targetname="t1_6" label="(357)"/>
+    <edge sourcename="t1_6" targetname="t1_7" label="(94)"/>
+    <edge sourcename="t1_7" targetname="t1_8" label="(500)"/>
+    <edge sourcename="t1_4" targetname="t1_9" label="(94)"/>
+    <edge sourcename="t1_8" targetname="t1_10" label="(16)"/>
+    <edge sourcename="t1_9" targetname="t1_11" label="(157)"/>
+    <edge sourcename="t1_10" targetname="t1_12" label="(16)"/>
+    <edge sourcename="t1_11" targetname="t1_13" label="(16)"/>
+    <edge sourcename="t1_12" targetname="t1_14" label="(16)"/>
+    <edge sourcename="t1_13" targetname="t1_15" label="(157)"/>
+  </edges>
+</graph>
