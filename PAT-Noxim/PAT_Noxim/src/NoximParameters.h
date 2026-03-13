@@ -11,26 +11,26 @@
 ***************************************************************************************************************************************/
 // Architecture Routers added by Amin Norollah
 #define DEFAULT_A_ROUTER                        1	
-#define DEFAULT_ROUTING_COMPUTATION             0	//0:normal           , 1:pre-routing (pre_RC/VA)
-#define DEFAULT_SWITCH_ALLOCATION               0	//0:normal           , 1:speculation SA (SA/VA)
+#define DEFAULT_ROUTING_COMPUTATION             1//0	//0:normal           , 1:pre-routing (pre_RC/VA)
+#define DEFAULT_SWITCH_ALLOCATION               1//0	//0:normal           , 1:speculation SA (SA/VA)
 #define DEFAULT_A_WITH_CREDIT                   1	
 
 // other setting in Noxim
 #define DEFAULT_VERBOSE_MODE                    VERBOSE_OFF
 #define DEFAULT_TRACE_MODE                      false
 #define DEFAULT_TRACE_FILENAME                  ""
-#define DEFAULT_MESH_DIM_X                      16//4
-#define DEFAULT_MESH_DIM_Y                      8//4
+#define DEFAULT_MESH_DIM_X                      4//4
+#define DEFAULT_MESH_DIM_Y                      4//4
 #define DEFAULT_MESH_DIM_Z                      4//2	//Default Number MESH_DIM_Z
-#define DEFAULT_NUM_VC                          1	//Default VC Number
-#define DEFAULT_BUFFER_DEPTH                    8
+#define DEFAULT_NUM_VC                          2//1	//Default VC Number
+#define DEFAULT_BUFFER_DEPTH                    16//8
 #define DEFAULT_MAX_PACKET_SIZE                 8
 #define DEFAULT_MIN_PACKET_SIZE                 8
-#define DEFAULT_ROUTING_ALGORITHM               ROUTING_XYZ  //ROUTING_XYZ  //ROUTING_WEST_FIRST //ROUTING_ODD_EVEN_3D //ROUTING_FULLY_ADAPTIVE
+#define DEFAULT_ROUTING_ALGORITHM               ROUTING_XYZ//ROUTING_XYZ  //ROUTING_XYZ  //ROUTING_WEST_FIRST //ROUTING_ODD_EVEN_3D //ROUTING_FULLY_ADAPTIVE
 #define DEFAULT_ROUTING_TABLE_FILENAME          ""
 #define DEFAULT_SELECTION_STRATEGY              SEL_NOP //SEL_RANDOM
-#define DEFAULT_PACKET_INJECTION_RATE           0.01
-#define DEFAULT_PROBABILITY_OF_RETRANSMISSION   0.01
+#define DEFAULT_PACKET_INJECTION_RATE           1.0//0.001
+#define DEFAULT_PROBABILITY_OF_RETRANSMISSION   1.0//0.001
 #define DEFAULT_TRAFFIC_DISTRIBUTION            TRAFFIC_TABLE_BASED//TRAFFIC_RANDOM
 #define DEFAULT_TRAFFIC_TABLE_FILENAME          "traffic.txt"
 #define DEFAULT_RESET_TIME                      1
@@ -232,7 +232,7 @@
 ****************************************************************************************************************************************
 ***************************************************************************************************************************************/
 
-#define POWER_SCALING                          2.2
+#define POWER_SCALING                          8.0//2.2
 #define Total_Simulation_Time_in_Sec           10
 #define Accumulation_Interval_in_Sec           0.01
 #define accEnergy_to_Transient_Power_coeff     (PARM_Freq / TEMP_REPORT_PERIOD)*POWER_SCALING
@@ -244,7 +244,7 @@
 #define TEMP_REPORT_PERIOD          TEMP_REPORT_NUM * CYCLE_PERIOD   //unit: ns
 
 //Initial temperature
-#define INIT_TEMP                  (25 + 273.15)     //(18 + 273.15)    //(40 + 273.15)    //(60 + 273.15)
+#define INIT_TEMP                  (18 + 273.15) //(25 + 273.15)     //(18 + 273.15)    //(40 + 273.15)    //(60 + 273.15)
 #define INIT_TEMP_80               (24.85 + 273.15)  //(17.85 + 273.15) //(39.85 + 273.15)
 #define TEMP_THRESHOLD             98
 #define BELTWAY_THRESHOLD          99.9
@@ -254,8 +254,8 @@
 #define HEAT_CAP_THERM_IF          4e6
 
 //<Resistivity in (m-K)/W>
-#define RESISTIVITY_SILICON        0.01
-#define RESISTIVITY_THERM_IF       0.25
+#define RESISTIVITY_SILICON        0.002//0.01
+#define RESISTIVITY_THERM_IF       0.02//0.25
 
 //<Thickness in m>
 #define THICKNESS_SILICON          0.00015

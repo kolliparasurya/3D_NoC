@@ -17,9 +17,10 @@ using namespace std;
 using namespace tinyxml2;
 
 #define SATURATION_THRESHOLD 1000
+#define PIR 0.0005 // 0.001 //1.0
 int TEMP_THRESHOLD = 6000;
-const int Gw = 16;
-const int Gl = 8;
+const int Gw = 4;
+const int Gl = 4;
 const int Gh = 4;
 const int NUNITS = 30;
 
@@ -458,7 +459,7 @@ vector<pair<int, int>> make_pairs(Application app)
 {
     vector<pair<int, int>> pairs;
     vector<int> tasks(app.tasks.size(), 0);
-    set<pair<int, int>, greater<pair<int, int>>> orderedEdges;
+    set<pair<double, int>, greater<pair<double, int>>> orderedEdges;
 
     for (int i = 0; i < app.edges.size(); i++)
         orderedEdges.insert({app.communicationVolume[i], i});
@@ -489,6 +490,76 @@ vector<pair<int, int>> make_pairs(Application app)
             pairs.push_back({orderedTasksVector[i].second, orderedTasksVector[i + 1].second});
         else
             pairs.push_back({orderedTasksVector[i].second, -1});
+    }
+    // --- OPTIMIZATION: Chain-Sort Pairs to Reduce Hop Count ---
+    // Reorders the array so adjacent pairs in the list communicate heavily,
+    // ensuring they are mapped to adjacent physical nodes in the brickVector.
+    if (!pairs.empty())
+    {
+        vector<pair<int, int>> chained_pairs;
+        vector<bool> visited(pairs.size(), false);
+
+        // Start with the first pair
+        chained_pairs.push_back(pairs[0]);
+        visited[0] = true;
+
+        for (size_t i = 1; i < pairs.size(); i++)
+        {
+            int best_idx = -1;
+            double max_comm = -1.0;
+            pair<int, int> current_tail = chained_pairs.back();
+
+            // Find the unvisited pair that communicates the most with the current tail
+            for (size_t j = 0; j < pairs.size(); j++)
+            {
+                if (!visited[j])
+                {
+                    double comm_vol = 0;
+
+                    // Sum the communication volume between the current_tail pair and pair[j]
+                    for (size_t e = 0; e < app.edges.size(); e++)
+                    {
+                        int u = app.edges[e][0];
+                        int v = app.edges[e][1];
+                        double vol = app.communicationVolume[e];
+
+                        bool tail_has_node = (u == current_tail.first || u == current_tail.second);
+                        bool next_has_node = (v == pairs[j].first || v == pairs[j].second);
+
+                        bool tail_has_node_rev = (v == current_tail.first || v == current_tail.second);
+                        bool next_has_node_rev = (u == pairs[j].first || u == pairs[j].second);
+
+                        if ((tail_has_node && next_has_node) || (tail_has_node_rev && next_has_node_rev))
+                        {
+                            comm_vol += vol;
+                        }
+                    }
+
+                    if (comm_vol > max_comm)
+                    {
+                        max_comm = comm_vol;
+                        best_idx = j;
+                    }
+                }
+            }
+
+            // If no direct connection is found, just grab the next available pair
+            if (best_idx == -1 || max_comm == 0)
+            {
+                for (size_t j = 0; j < pairs.size(); j++)
+                {
+                    if (!visited[j])
+                    {
+                        best_idx = j;
+                        break;
+                    }
+                }
+            }
+
+            chained_pairs.push_back(pairs[best_idx]);
+            visited[best_idx] = true;
+        }
+        pairs = chained_pairs; // Overwrite the random array with the highly optimized chain
     }
     return pairs;
 }
@@ -818,7 +889,7 @@ int graphsUpdating(int argc, char *argv[])
                 if (reindex.count(s) && reindex.count(tr))
                 {
                     edgesVec.push_back({reindex[s], reindex[tr]});
-                    commVol.push_back(w + 50); // Keeping original logic
+                    commVol.push_back(w); // Keeping original logic
                 }
             }
         }
@@ -904,15 +975,23 @@ int main(int argc, char *argv[])
                     {
                         // Original logic checked time overlap or index alignment?
                         // Original: if (task_timestamp[second_task][l][0] == k)
-                        if (v2[l][0] == k)
+                        int start1 = v1[k][2], end1 = v1[k][3];
+                        int start2 = v2[l][2], end2 = v2[l][3];
+
+                        // Find the overlapping time window
+                        int overlap_start = max(start1, start2);
+                        int overlap_end = min(end1, end2);
+
+                        // If the overlapping window is valid (they existed at the same time)
+                        if (overlap_start < overlap_end)
                         {
                             if (abs(v1[k][1] - v2[l][1]) == Gw * Gl)
                                 edges_on_tsv++;
                             if (v1[k][2] != v1[k][3])
                             {
                                 testTraffic << v1[k][1] << " " << v2[l][1] << " "
-                                            << 0.001 * apps[i].communicationVolume[j] << " "
-                                            << 0.001 * apps[i].communicationVolume[j] << " "
+                                            << PIR * apps[i].communicationVolume[j] << " "
+                                            << PIR * apps[i].communicationVolume[j] << " "
                                             << v1[k][2] << " " << v1[k][3] << endl;
                             }
                             break;

@@ -3,7 +3,7 @@
 Y
 Y
 1.75e+06
-0.01
+0.002
 0.00015
 mesh3d_0.flp
 
@@ -12,7 +12,7 @@ mesh3d_0.flp
 Y
 N
 4e+06
-0.25
+0.02
 2e-05
 mesh3d_0.flp
 
@@ -21,7 +21,7 @@ mesh3d_0.flp
 Y
 Y
 1.75e+06
-0.01
+0.002
 0.00015
 mesh3d_1.flp
 
@@ -30,7 +30,7 @@ mesh3d_1.flp
 Y
 N
 4e+06
-0.25
+0.02
 2e-05
 mesh3d_1.flp
 
@@ -39,7 +39,7 @@ mesh3d_1.flp
 Y
 Y
 1.75e+06
-0.01
+0.002
 0.00015
 mesh3d_2.flp
 
@@ -48,7 +48,7 @@ mesh3d_2.flp
 Y
 N
 4e+06
-0.25
+0.02
 2e-05
 mesh3d_2.flp
 
@@ -57,7 +57,7 @@ mesh3d_2.flp
 Y
 Y
 1.75e+06
-0.01
+0.002
 0.00015
 mesh3d_3.flp
 
@@ -66,7 +66,7 @@ mesh3d_3.flp
 Y
 N
 4e+06
-0.25
+0.02
 2e-05
 mesh3d_3.flp
 

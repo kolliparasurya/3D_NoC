@@ -23,9 +23,10 @@ using namespace tinyxml2;
 */
 
 #define SATURATION_THRESHOLD 1000
+#define PIR 0.0005 //0.001 //1.0
 int TEMP_THRESHOLD = 6000;
-const int Gw = 16;
-const int Gl = 8;
+const int Gw = 4;
+const int Gl = 4;
 const int Gh = 4;
 const int NUNITS = 30; // These units are represent the no of components of everynode which is used in the thermal simulation
 int f = 0, s = 0;
@@ -1015,7 +1016,7 @@ int graphsUpdating(int argc, char *argv[])
                 if (reindex.count(s) && reindex.count(tr))
                 {
                     edgesVec.push_back({reindex[s], reindex[tr]});
-                    commVol.push_back(w + 50); // Keeping original logic
+                    commVol.push_back(w); // Keeping original logic
                 }
             }
         }
@@ -1122,8 +1123,8 @@ int main(int argc, char *argv[])
                                 edges_on_tsv++;
                             testTraffic << list1[k][1] << " "
                                         << list2[l][1] << " "
-                                        << 0.001 * apps[i].communicationVolume[j] << " "
-                                        << 0.001 * apps[i].communicationVolume[j] << " "
+                                        << PIR * apps[i].communicationVolume[j] << " "
+                                        << PIR * apps[i].communicationVolume[j] << " "
                                         << list1[k][2] << " "
                                         << list1[k][3] << endl;
                             break;

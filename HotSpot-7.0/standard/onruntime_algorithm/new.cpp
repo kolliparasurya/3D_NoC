@@ -4,15 +4,18 @@
 
 using namespace std;
 using namespace tinyxml2;
+#define PIR 0.0005 //0.001 //1.0
 
-const int Gw = 16;
-const int Gl = 8;
+const int Gw = 4;
+const int Gl = 4;
 const int Gh = 4;
 
 const double sigmastar_const = 1.15;
 const int task_multiplyer = 10000;
 int glbmark = 1;
 int mnt = 0;
+
+const int BEAM_WIDTH = 2;
 
 double edges_on_tsv = 0;
 double avg_node_layer = 0;
@@ -173,8 +176,6 @@ struct SearchNode
     std::vector<std::pair<int, int>> decisions;
     std::vector<int> current_free_cores;
 };
-
-const int BEAM_WIDTH = 1;
 
 AppIntPair reconstructResult(const std::vector<Application *> &original_apps, const SearchNode &bestNode)
 {
@@ -1093,8 +1094,8 @@ int main(int argc, char *argv[])
                         {
                             testTraffic << vec_first[k][1] << " "
                                         << vec_second[l][1] << " "
-                                        << 0.001 * tapps[i].commVolume[j] << " "
-                                        << 0.001 * tapps[i].commVolume[j] << " "
+                                        << PIR * tapps[i].commVolume[j] << " "
+                                        << PIR * tapps[i].commVolume[j] << " "
                                         << vec_first[k][2] << " "
                                         << vec_first[k][3] << endl;
                         }
