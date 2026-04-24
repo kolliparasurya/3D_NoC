@@ -1,2 +1,0 @@
-Router_power_data = [
-%              CYCLES		4 4 4

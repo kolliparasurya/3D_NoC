@@ -1,3 +1,0 @@
-Cycle 	RecivedFlits 	Throughput 	Throt. Num. 	Max. Temp.	Adaptive 	DOR 	DW 	Mid_Adaptive 	Mid_DOR 	Mid_DW 	Beltway
-7000	672	0	0	0	672	0	0	0	0	0	0	
-10000	0	0	0	18.123	0	0	0	0	0	0	0	

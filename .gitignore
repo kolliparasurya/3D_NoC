@@ -1,7 +1,7 @@
 simulation/avg.grid.ttrace
 simulation/avg.grid.ttrace
 shreya_results
-surya_results
+surya_results/
 tgff-3.5
 output.txt
 *.grid.ttrace
