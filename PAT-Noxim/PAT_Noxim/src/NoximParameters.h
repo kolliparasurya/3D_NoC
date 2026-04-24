@@ -22,13 +22,13 @@
 #define DEFAULT_MESH_DIM_X                      4//4
 #define DEFAULT_MESH_DIM_Y                      4//4
 #define DEFAULT_MESH_DIM_Z                      4//2	//Default Number MESH_DIM_Z
-#define DEFAULT_NUM_VC                          2//1	//Default VC Number
-#define DEFAULT_BUFFER_DEPTH                    16//8
-#define DEFAULT_MAX_PACKET_SIZE                 8
-#define DEFAULT_MIN_PACKET_SIZE                 8
-#define DEFAULT_ROUTING_ALGORITHM               ROUTING_XYZ//ROUTING_XYZ  //ROUTING_XYZ  //ROUTING_WEST_FIRST //ROUTING_ODD_EVEN_3D //ROUTING_FULLY_ADAPTIVE
+#define DEFAULT_NUM_VC                          4//2//1	//Default VC Number
+#define DEFAULT_BUFFER_DEPTH                    32//8
+#define DEFAULT_MAX_PACKET_SIZE                 16//8
+#define DEFAULT_MIN_PACKET_SIZE                 16//8
+#define DEFAULT_ROUTING_ALGORITHM               ROUTING_ZXY//ROUTING_XYZ  
 #define DEFAULT_ROUTING_TABLE_FILENAME          ""
-#define DEFAULT_SELECTION_STRATEGY              SEL_NOP //SEL_RANDOM
+#define DEFAULT_SELECTION_STRATEGY              SEL_THERMAL//SEL_NOP //SEL_RANDOM
 #define DEFAULT_PACKET_INJECTION_RATE           1.0//0.001
 #define DEFAULT_PROBABILITY_OF_RETRANSMISSION   1.0//0.001
 #define DEFAULT_TRAFFIC_DISTRIBUTION            TRAFFIC_TABLE_BASED//TRAFFIC_RANDOM
@@ -42,8 +42,8 @@
 // MODIFY BY HUI-SHUN
 #define DEFAULT_DW_LAYER_SEL                    DW_BL
 #define DEFAULT_DOWN_LEVEL                      3
-#define DEFAULT_THROTTLING_TYPE                 THROT_NORMAL
-#define DEFAULT_THROTTLING_RATIO                0
+#define DEFAULT_THROTTLING_TYPE                 THROT_VERTICAL//THROT_NORMAL
+#define DEFAULT_THROTTLING_RATIO                0.2//0
 #define DEFAULT_VERTICAL_LINK                   VERTICAL_MESH
 #define DEFAULT_CASCADE_NODE                    false
 #define DEFAULT_BELTWAY                         false

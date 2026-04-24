@@ -595,53 +595,164 @@ int calculate_starting_point(int numPairs, int mark)
     }
     return (ans == 1) ? st_pt : -1;
 }
+// CORRECTED STRATEGY: Finds a compact 3D bounding box AND weaves the pairs to preserve the chain
+vector<pair<Core*, Core*>> find_compact_mapping(int numPairs, int mark) {
+    vector<pair<Core*, Core*>> target_cores;
+    
+    int w = ceil(sqrt(numPairs));
+    int h = ceil((double)numPairs / w);
+    
+    if (w > Gw) { w = Gw; h = ceil((double)numPairs / w); }
+    if (h > Gl) { h = Gl; w = ceil((double)numPairs / h); }
+
+    for (int z = 0; z < Gh - 1; z += 2) {
+        for (int y = 0; y <= Gl - h; ++y) {
+            for (int x = 0; x <= Gw - w; ++x) {
+                
+                bool region_free = true;
+                int valid_pairs = 0;
+                target_cores.clear();
+                
+                for (int dy = 0; dy < h && region_free; ++dy) {
+                    for (int dx_idx = 0; dx_idx < w && region_free; ++dx_idx) {
+                        
+                        // THE FIX: Weave horizontally (Zig-Zag) to keep sequential pairs physically adjacent!
+                        int dx = (dy % 2 == 0) ? dx_idx : (w - 1 - dx_idx);
+                        
+                        Core* c1 = &mesh[x + dx][y + dy][z];
+                        Core* c2 = &mesh[x + dx][y + dy][z + 1];
+                        
+                        if (c1->isFree && c1->isnotBlocked && c2->isFree && c2->isnotBlocked) {
+                            target_cores.push_back({c1, c2});
+                            valid_pairs++;
+                            if (valid_pairs == numPairs) break; 
+                        } else {
+                            region_free = false; 
+                        }
+                    }
+                    if (valid_pairs == numPairs) break;
+                }
+                
+                if (region_free && valid_pairs == numPairs) {
+                    return target_cores; 
+                }
+            }
+        }
+    }
+    
+    // Fallback
+    target_cores.clear();
+    int st_pt = calculate_starting_point(numPairs, mark);
+    if (st_pt != -1) {
+        for (int i = st_pt; i < st_pt + numPairs; i++) {
+            target_cores.push_back(brickVector[i]);
+        }
+    }
+    
+    return target_cores;
+}
 
 int mapping_application(vector<pair<int, int>> pairs, int appId, Application app, int mark)
 {
-    int st_pt = calculate_starting_point(pairs.size(), mark);
-    if (st_pt != -1)
+    // Call our new compact 3D bounding box mapper
+    vector<pair<Core*, Core*>> target_slots = find_compact_mapping(pairs.size(), mark);
+    
+    if (!target_slots.empty())
     {
-        int x = 0;
-        appsLoc.push_back({st_pt, pairs.size()});
-        for (int i = st_pt; i < st_pt + pairs.size(); i++, x++)
+        // Storing -1 for the starting point since it's no longer a 1D index
+        appsLoc.push_back({-1, pairs.size()}); 
+        
+        for (size_t x = 0; x < pairs.size(); x++)
         {
+            Core* c1 = target_slots[x].first;
+            Core* c2 = target_slots[x].second;
+
             // Core 1
             int t1 = pairs[x].first;
-            brickVector[i].first->task_id_int = cnv_task_buf(appId, t1); // Store int ID
-            brickVector[i].first->isFree = 0;
-            brickVector[i].first->wareoff_const += app.tasks[t1];
-            brickVector[i].first->num_time_task = 0;
-            brickVector[i].first->time_of_death = total_sim_time + app.runtime;
+            c1->task_id_int = cnv_task_buf(appId, t1);
+            c1->isFree = 0;
+            c1->wareoff_const += app.tasks[t1];
+            c1->num_time_task = 0;
+            c1->time_of_death = total_sim_time + app.runtime;
 
-            int buf1 = brickVector[i].first->task_id_int;
+            int buf1 = c1->task_id_int;
             task_timestamp[buf1].push_back({0,
-                                            brickVector[i].first->x + (brickVector[i].first->y * Gw) + (brickVector[i].first->z * Gw * Gl),
+                                            c1->x + (c1->y * Gw) + (c1->z * Gw * Gl),
                                             total_sim_time,
-                                            brickVector[i].first->time_of_death});
-            avg_node_layer += brickVector[i].first->z;
+                                            c1->time_of_death});
+            avg_node_layer += c1->z;
 
             // Core 2 (if pair exists)
             if (pairs[x].second != -1)
             {
                 int t2 = pairs[x].second;
-                brickVector[i].second->task_id_int = cnv_task_buf(appId, t2); // Store int ID
-                brickVector[i].second->isFree = 0;
-                brickVector[i].second->wareoff_const += app.tasks[t2];
-                brickVector[i].second->num_time_task = 0;
-                brickVector[i].second->time_of_death = total_sim_time + app.runtime;
+                c2->task_id_int = cnv_task_buf(appId, t2);
+                c2->isFree = 0;
+                c2->wareoff_const += app.tasks[t2];
+                c2->num_time_task = 0;
+                c2->time_of_death = total_sim_time + app.runtime;
 
-                int buf2 = brickVector[i].second->task_id_int;
+                int buf2 = c2->task_id_int;
                 task_timestamp[buf2].push_back({0,
-                                                brickVector[i].second->x + (brickVector[i].second->y * Gw) + (brickVector[i].second->z * Gw * Gl),
+                                                c2->x + (c2->y * Gw) + (c2->z * Gw * Gl),
                                                 total_sim_time,
-                                                brickVector[i].second->time_of_death});
-                avg_node_layer += brickVector[i].second->z;
+                                                c2->time_of_death});
+                avg_node_layer += c2->z;
             }
         }
+        cout << "1r ";
+        return 1;
     }
-    cout << ((st_pt != -1) ? 1 : 0) << "r ";
-    return (st_pt != -1);
+    cout << "0r ";
+    return 0; // Failed to map (chip is entirely full)
 }
+
+// int mapping_application(vector<pair<int, int>> pairs, int appId, Application app, int mark)
+// {
+//     int st_pt = calculate_starting_point(pairs.size(), mark);
+//     if (st_pt != -1)
+//     {
+//         int x = 0;
+//         appsLoc.push_back({st_pt, pairs.size()});
+//         for (int i = st_pt; i < st_pt + pairs.size(); i++, x++)
+//         {
+//             // Core 1
+//             int t1 = pairs[x].first;
+//             brickVector[i].first->task_id_int = cnv_task_buf(appId, t1); // Store int ID
+//             brickVector[i].first->isFree = 0;
+//             brickVector[i].first->wareoff_const += app.tasks[t1];
+//             brickVector[i].first->num_time_task = 0;
+//             brickVector[i].first->time_of_death = total_sim_time + app.runtime;
+
+//             int buf1 = brickVector[i].first->task_id_int;
+//             task_timestamp[buf1].push_back({0,
+//                                             brickVector[i].first->x + (brickVector[i].first->y * Gw) + (brickVector[i].first->z * Gw * Gl),
+//                                             total_sim_time,
+//                                             brickVector[i].first->time_of_death});
+//             avg_node_layer += brickVector[i].first->z;
+
+//             // Core 2 (if pair exists)
+//             if (pairs[x].second != -1)
+//             {
+//                 int t2 = pairs[x].second;
+//                 brickVector[i].second->task_id_int = cnv_task_buf(appId, t2); // Store int ID
+//                 brickVector[i].second->isFree = 0;
+//                 brickVector[i].second->wareoff_const += app.tasks[t2];
+//                 brickVector[i].second->num_time_task = 0;
+//                 brickVector[i].second->time_of_death = total_sim_time + app.runtime;
+
+//                 int buf2 = brickVector[i].second->task_id_int;
+//                 task_timestamp[buf2].push_back({0,
+//                                                 brickVector[i].second->x + (brickVector[i].second->y * Gw) + (brickVector[i].second->z * Gw * Gl),
+//                                                 total_sim_time,
+//                                                 brickVector[i].second->time_of_death});
+//                 avg_node_layer += brickVector[i].second->z;
+//             }
+//         }
+//     }
+//     cout << ((st_pt != -1) ? 1 : 0) << "r ";
+//     return (st_pt != -1);
+// }
 
 string shape = to_string(Gw) + "x" + to_string(Gl) + "x" + to_string(Gh);
 void thermal_initiation()
@@ -769,7 +880,7 @@ void pair_algorithm()
         if (cnt != 0)
         {
             free_mesh();
-            fillGaps(); // Now uses reliability check
+            //fillGaps(); // Now uses reliability check
         }
 
         Thermal_block();

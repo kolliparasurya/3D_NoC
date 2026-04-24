@@ -1,5 +1,5 @@
-48 12
-Avg node layer: 1.5
-Avg Edges on tsv: 0.48
+17 4
+Avg node layer: 1.7
+Avg Edges on tsv: 0.5
 
-Running time: 0.0629982 seconds
+Running time: 0.0100344 seconds
