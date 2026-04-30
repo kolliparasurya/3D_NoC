@@ -6,8 +6,8 @@ using namespace std;
 using namespace tinyxml2;
 #define PIR 0.002//0.0005 //0.001 //1.0
 
-const int Gw = 4;
-const int Gl = 4;
+const int Gw = 8;
+const int Gl = 8;
 const int Gh = 4;
 
 const double sigmastar_const = 1.15;
@@ -15,7 +15,7 @@ const int task_multiplyer = 10000;
 int glbmark = 1;
 int mnt = 0;
 
-const int BEAM_WIDTH = 2;
+const int BEAM_WIDTH = 1;
 
 double edges_on_tsv = 0;
 double avg_node_layer = 0;
@@ -663,7 +663,7 @@ void defragmentation(vector<Application *> &apps)
 
     if (F > FTH)
     {
-        sort(apps.begin(), apps.end(), compare);
+        // sort(apps.begin(), apps.end(), compare);
         for (auto &app : apps)
         {
             if (app->placed != 0)

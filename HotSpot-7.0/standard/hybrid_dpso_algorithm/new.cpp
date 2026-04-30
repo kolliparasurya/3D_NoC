@@ -25,8 +25,8 @@ using namespace tinyxml2;
 #define SATURATION_THRESHOLD 1000
 #define PIR 0.002//0.0005 //0.001 //1.0
 int TEMP_THRESHOLD = 6000;
-const int Gw = 4;
-const int Gl = 4;
+const int Gw = 8;
+const int Gl = 8;
 const int Gh = 4;
 const int NUNITS = 30; // These units are represent the no of components of everynode which is used in the thermal simulation
 int f = 0, s = 0;
@@ -111,8 +111,8 @@ ofstream mapFile("./mapping/mapFile.txt");
 #define W_MIN 0.4
 #define C1 2.0      // Cognitive coefficient
 #define C2 2.0      // Social coefficient
-#define ITER_MAX 25//50 // Max iterations for PSO
-#define POP_SIZE 10//20 // Particle population size
+#define ITER_MAX 10//50 // Max iterations for PSO
+#define POP_SIZE 6//20 // Particle population size
 #define DIVERSITY_THRESHOLD 0.1
 
 // --- Helper Structs for PSO ---
