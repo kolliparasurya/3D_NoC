@@ -33,17 +33,17 @@
 #define DEFAULT_PROBABILITY_OF_RETRANSMISSION   1.0//0.001
 #define DEFAULT_TRAFFIC_DISTRIBUTION            TRAFFIC_TABLE_BASED//TRAFFIC_RANDOM
 #define DEFAULT_TRAFFIC_TABLE_FILENAME          "traffic.txt"
-#define DEFAULT_RESET_TIME                      2
+#define DEFAULT_RESET_TIME                      3
 #define DEFAULT_SIMULATION_TIME                 10000
 #define DEFAULT_STATS_WARM_UP_TIME              DEFAULT_RESET_TIME
 #define DEFAULT_DETAILED                        false
-#define DEFAULT_DYAD_THRESHOLD                  2.0//0.6
+#define DEFAULT_DYAD_THRESHOLD                  1.5//0.6
 #define DEFAULT_MAX_VOLUME_TO_BE_DRAINED        0
 // MODIFY BY HUI-SHUN
 #define DEFAULT_DW_LAYER_SEL                    DW_BL
-#define DEFAULT_DOWN_LEVEL                      2//3
+#define DEFAULT_DOWN_LEVEL                      1//3
 #define DEFAULT_THROTTLING_TYPE                 THROT_VERTICAL//THROT_NORMAL
-#define DEFAULT_THROTTLING_RATIO                0.15//0
+#define DEFAULT_THROTTLING_RATIO                0.2//0
 #define DEFAULT_VERTICAL_LINK                   VERTICAL_MESH
 #define DEFAULT_CASCADE_NODE                    false
 #define DEFAULT_BELTWAY                         false

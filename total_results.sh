@@ -1,10 +1,9 @@
 #!/bin/bash
 
 multimedia_benchmark=("MWD" "VOPD" "DVOPD")
-netrace_benchmark=("blackscholes")
-# "bodytrack" "canneal" "dedup" "ferret" "fluidanimate" "swaptions" "vips"
-random_benchmark=("graph3")
-
+netrace_benchmark=("blackscholes" "bodytrack" "ferret")
+random_benchmark=("graph3" )
+# "blackscholes" "bodytrack" "canneal" "dedup" "ferret" "fluidanimate" "swaptions" "vips"
 dx=8
 dy=8
 dz=4

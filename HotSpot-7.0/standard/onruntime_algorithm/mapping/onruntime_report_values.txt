@@ -1,4 +1,4 @@
 Avg node layer: 3
 Avg Edges on tsv: 0
 
-Running time: 0.00129702 seconds
+Running time: 0.00133111 seconds

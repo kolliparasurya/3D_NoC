@@ -455,15 +455,131 @@ void loadNodes()
         }
     }
 }
+// vector<pair<int, int>> make_pairs(Application app)
+// {
+//     vector<pair<int, int>> pairs;
+//     vector<int> tasks(app.tasks.size(), 0);
+//     set<pair<double, int>, greater<pair<double, int>>> orderedEdges;
+
+//     for (int i = 0; i < app.edges.size(); i++)
+//         orderedEdges.insert({app.communicationVolume[i], i});
+
+//     for (auto &x : orderedEdges)
+//     {
+//         if (tasks[app.edges[x.second][0]] == 0 && tasks[app.edges[x.second][1]] == 0)
+//         {
+//             pairs.push_back({app.edges[x.second][0], app.edges[x.second][1]});
+//             tasks[app.edges[x.second][0]] = 1;
+//             tasks[app.edges[x.second][1]] = 1;
+//         }
+//     }
+
+//     vector<int> remTasks;
+//     for (int i = 0; i < tasks.size(); i++)
+//         if (tasks[i] == 0)
+//             remTasks.push_back(i);
+
+//     set<pair<int, int>, greater<pair<int, int>>> orderedTasks;
+//     for (int i = 0; i < remTasks.size(); i++)
+//         orderedTasks.insert({app.tasks[remTasks[i]], remTasks[i]});
+
+//     vector<pair<int, int>> orderedTasksVector(orderedTasks.begin(), orderedTasks.end());
+//     for (size_t i = 0; i < orderedTasksVector.size(); i += 2)
+//     {
+//         if (i + 1 < orderedTasksVector.size())
+//             pairs.push_back({orderedTasksVector[i].second, orderedTasksVector[i + 1].second});
+//         else
+//             pairs.push_back({orderedTasksVector[i].second, -1});
+//     }
+//     // --- OPTIMIZATION: Chain-Sort Pairs to Reduce Hop Count ---
+//     // Reorders the array so adjacent pairs in the list communicate heavily,
+//     // ensuring they are mapped to adjacent physical nodes in the brickVector.
+//     if (!pairs.empty())
+//     {
+//         vector<pair<int, int>> chained_pairs;
+//         vector<bool> visited(pairs.size(), false);
+
+//         // Start with the first pair
+//         chained_pairs.push_back(pairs[0]);
+//         visited[0] = true;
+
+//         for (size_t i = 1; i < pairs.size(); i++)
+//         {
+//             int best_idx = -1;
+//             double max_comm = -1.0;
+//             pair<int, int> current_tail = chained_pairs.back();
+
+//             // Find the unvisited pair that communicates the most with the current tail
+//             for (size_t j = 0; j < pairs.size(); j++)
+//             {
+//                 if (!visited[j])
+//                 {
+//                     double comm_vol = 0;
+
+//                     // Sum the communication volume between the current_tail pair and pair[j]
+//                     for (size_t e = 0; e < app.edges.size(); e++)
+//                     {
+//                         int u = app.edges[e][0];
+//                         int v = app.edges[e][1];
+//                         double vol = app.communicationVolume[e];
+
+//                         bool tail_has_node = (u == current_tail.first || u == current_tail.second);
+//                         bool next_has_node = (v == pairs[j].first || v == pairs[j].second);
+
+//                         bool tail_has_node_rev = (v == current_tail.first || v == current_tail.second);
+//                         bool next_has_node_rev = (u == pairs[j].first || u == pairs[j].second);
+
+//                         if ((tail_has_node && next_has_node) || (tail_has_node_rev && next_has_node_rev))
+//                         {
+//                             comm_vol += vol;
+//                         }
+//                     }
+
+//                     if (comm_vol > max_comm)
+//                     {
+//                         max_comm = comm_vol;
+//                         best_idx = j;
+//                     }
+//                 }
+//             }
+
+//             // If no direct connection is found, just grab the next available pair
+//             if (best_idx == -1 || max_comm == 0)
+//             {
+//                 for (size_t j = 0; j < pairs.size(); j++)
+//                 {
+//                     if (!visited[j])
+//                     {
+//                         best_idx = j;
+//                         break;
+//                     }
+//                 }
+//             }
+
+//             chained_pairs.push_back(pairs[best_idx]);
+//             visited[best_idx] = true;
+//         }
+//         pairs = chained_pairs; // Overwrite the random array with the highly optimized chain
+//     }
+//     return pairs;
+// }
+
 vector<pair<int, int>> make_pairs(Application app)
 {
     vector<pair<int, int>> pairs;
     vector<int> tasks(app.tasks.size(), 0);
     set<pair<double, int>, greater<pair<double, int>>> orderedEdges;
 
+    // 1. Calculate the "Gravity" (Total Traffic) for every single task
+    vector<double> task_gravity(app.tasks.size(), 0.0);
     for (int i = 0; i < app.edges.size(); i++)
+    {
         orderedEdges.insert({app.communicationVolume[i], i});
+        task_gravity[app.edges[i][0]] += app.communicationVolume[i];
+        task_gravity[app.edges[i][1]] += app.communicationVolume[i];
+    }
 
+    // 2. Greedy Pairing (Preserves TSV 0-hop vertical advantage)
     for (auto &x : orderedEdges)
     {
         if (tasks[app.edges[x.second][0]] == 0 && tasks[app.edges[x.second][1]] == 0)
@@ -474,6 +590,7 @@ vector<pair<int, int>> make_pairs(Application app)
         }
     }
 
+    // 3. Catch remaining unpaired tasks
     vector<int> remTasks;
     for (int i = 0; i < tasks.size(); i++)
         if (tasks[i] == 0)
@@ -491,59 +608,83 @@ vector<pair<int, int>> make_pairs(Application app)
         else
             pairs.push_back({orderedTasksVector[i].second, -1});
     }
-    // --- OPTIMIZATION: Chain-Sort Pairs to Reduce Hop Count ---
-    // Reorders the array so adjacent pairs in the list communicate heavily,
-    // ensuring they are mapped to adjacent physical nodes in the brickVector.
+
+    // 4. Sort Pairs by Combined Node Gravity
+    // This ensures pairs[0] is the absolute heaviest traffic hub in the application
+    sort(pairs.begin(), pairs.end(), [&](pair<int, int>& a, pair<int, int>& b) {
+        double grav_a = task_gravity[a.first] + (a.second != -1 ? task_gravity[a.second] : 0);
+        double grav_b = task_gravity[b.first] + (b.second != -1 ? task_gravity[b.second] : 0);
+        return grav_a > grav_b;
+    });
+
+    // 5. THE UNIVERSAL LINK: Bi-Directional Pipeline Building
+    // Builds the pipeline outward from both the head and the tail. 
+    // This perfectly centers the heaviest gravity nodes for blackscholes
+    // while maintaining strict 1-hop physical adjacency for ferret.
     if (!pairs.empty())
     {
-        vector<pair<int, int>> chained_pairs;
+        deque<pair<int, int>> bi_chain;
         vector<bool> visited(pairs.size(), false);
 
-        // Start with the first pair
-        chained_pairs.push_back(pairs[0]);
+        // Seed the center of the pipeline with the absolute heaviest hub
+        bi_chain.push_back(pairs[0]);
         visited[0] = true;
 
         for (size_t i = 1; i < pairs.size(); i++)
         {
             int best_idx = -1;
             double max_comm = -1.0;
-            pair<int, int> current_tail = chained_pairs.back();
+            bool add_to_head = false;
+            
+            pair<int, int> current_head = bi_chain.front();
+            pair<int, int> current_tail = bi_chain.back();
 
-            // Find the unvisited pair that communicates the most with the current tail
+            // Find the pair that communicates most with EITHER the head or the tail
             for (size_t j = 0; j < pairs.size(); j++)
             {
                 if (!visited[j])
                 {
-                    double comm_vol = 0;
+                    double comm_with_head = 0;
+                    double comm_with_tail = 0;
 
-                    // Sum the communication volume between the current_tail pair and pair[j]
                     for (size_t e = 0; e < app.edges.size(); e++)
                     {
-                        int u = app.edges[e][0];
-                        int v = app.edges[e][1];
+                        int u = app.edges[e][0], v = app.edges[e][1];
                         double vol = app.communicationVolume[e];
 
+                        // Check head connections
+                        bool head_has_node = (u == current_head.first || u == current_head.second);
+                        bool head_has_node_rev = (v == current_head.first || v == current_head.second);
+                        bool j_has_node = (v == pairs[j].first || v == pairs[j].second);
+                        bool j_has_node_rev = (u == pairs[j].first || u == pairs[j].second);
+
+                        if ((head_has_node && j_has_node) || (head_has_node_rev && j_has_node_rev)) {
+                            comm_with_head += vol;
+                        }
+
+                        // Check tail connections
                         bool tail_has_node = (u == current_tail.first || u == current_tail.second);
-                        bool next_has_node = (v == pairs[j].first || v == pairs[j].second);
-
                         bool tail_has_node_rev = (v == current_tail.first || v == current_tail.second);
-                        bool next_has_node_rev = (u == pairs[j].first || u == pairs[j].second);
 
-                        if ((tail_has_node && next_has_node) || (tail_has_node_rev && next_has_node_rev))
-                        {
-                            comm_vol += vol;
+                        if ((tail_has_node && j_has_node) || (tail_has_node_rev && j_has_node_rev)) {
+                            comm_with_tail += vol;
                         }
                     }
 
-                    if (comm_vol > max_comm)
-                    {
-                        max_comm = comm_vol;
+                    if (comm_with_head > max_comm) {
+                        max_comm = comm_with_head;
                         best_idx = j;
+                        add_to_head = true;
+                    }
+                    if (comm_with_tail > max_comm) {
+                        max_comm = comm_with_tail;
+                        best_idx = j;
+                        add_to_head = false;
                     }
                 }
             }
 
-            // If no direct connection is found, just grab the next available pair
+            // Fallback if no direct connections are left
             if (best_idx == -1 || max_comm == 0)
             {
                 for (size_t j = 0; j < pairs.size(); j++)
@@ -551,16 +692,25 @@ vector<pair<int, int>> make_pairs(Application app)
                     if (!visited[j])
                     {
                         best_idx = j;
+                        add_to_head = false; 
                         break;
                     }
                 }
             }
 
-            chained_pairs.push_back(pairs[best_idx]);
+            // Attach the winner to the correct end of the pipeline
+            if (add_to_head) {
+                bi_chain.push_front(pairs[best_idx]);
+            } else {
+                bi_chain.push_back(pairs[best_idx]);
+            }
             visited[best_idx] = true;
         }
-        pairs = chained_pairs; // Overwrite the random array with the highly optimized chain
+        
+        // Overwrite the raw array with the perfectly balanced bi-directional pipeline
+        pairs.assign(bi_chain.begin(), bi_chain.end());
     }
+
     return pairs;
 }
 
@@ -596,61 +746,140 @@ int calculate_starting_point(int numPairs, int mark)
     return (ans == 1) ? st_pt : -1;
 }
 // CORRECTED STRATEGY: Finds a compact 3D bounding box AND weaves the pairs to preserve the chain
-vector<pair<Core*, Core*>> find_compact_mapping(int numPairs, int mark) {
-    vector<pair<Core*, Core*>> target_cores;
+// vector<pair<Core*, Core*>> find_compact_mapping(int numPairs, int mark) {
+//     vector<pair<Core*, Core*>> target_cores;
     
-    int w = ceil(sqrt(numPairs));
-    int h = ceil((double)numPairs / w);
+//     int w = ceil(sqrt(numPairs));
+//     int h = ceil((double)numPairs / w);
     
-    if (w > Gw) { w = Gw; h = ceil((double)numPairs / w); }
-    if (h > Gl) { h = Gl; w = ceil((double)numPairs / h); }
+//     if (w > Gw) { w = Gw; h = ceil((double)numPairs / w); }
+//     if (h > Gl) { h = Gl; w = ceil((double)numPairs / h); }
 
-    for (int z = 0; z < Gh - 1; z += 2) {
-        for (int y = 0; y <= Gl - h; ++y) {
-            for (int x = 0; x <= Gw - w; ++x) {
+//     for (int z = 0; z < Gh - 1; z += 2) {
+//         for (int y = 0; y <= Gl - h; ++y) {
+//             for (int x = 0; x <= Gw - w; ++x) {
                 
-                bool region_free = true;
-                int valid_pairs = 0;
-                target_cores.clear();
+//                 bool region_free = true;
+//                 int valid_pairs = 0;
+//                 target_cores.clear();
                 
-                for (int dy = 0; dy < h && region_free; ++dy) {
-                    for (int dx_idx = 0; dx_idx < w && region_free; ++dx_idx) {
+//                 for (int dy = 0; dy < h && region_free; ++dy) {
+//                     for (int dx_idx = 0; dx_idx < w && region_free; ++dx_idx) {
                         
-                        // THE FIX: Weave horizontally (Zig-Zag) to keep sequential pairs physically adjacent!
+//                         // THE FIX: Weave horizontally (Zig-Zag) to keep sequential pairs physically adjacent!
+//                         int dx = (dy % 2 == 0) ? dx_idx : (w - 1 - dx_idx);
+                        
+//                         Core* c1 = &mesh[x + dx][y + dy][z];
+//                         Core* c2 = &mesh[x + dx][y + dy][z + 1];
+                        
+//                         if (c1->isFree && c1->isnotBlocked && c2->isFree && c2->isnotBlocked) {
+//                             target_cores.push_back({c1, c2});
+//                             valid_pairs++;
+//                             if (valid_pairs == numPairs) break; 
+//                         } else {
+//                             region_free = false; 
+//                         }
+//                     }
+//                     if (valid_pairs == numPairs) break;
+//                 }
+                
+//                 if (region_free && valid_pairs == numPairs) {
+//                     return target_cores; 
+//                 }
+//             }
+//         }
+//     }
+    
+//     // Fallback
+//     target_cores.clear();
+//     int st_pt = calculate_starting_point(numPairs, mark);
+//     if (st_pt != -1) {
+//         for (int i = st_pt; i < st_pt + numPairs; i++) {
+//             target_cores.push_back(brickVector[i]);
+//         }
+//     }
+    
+//     return target_cores;
+// }
+// THE MULTI-APP STRATEGY: Adaptive 2D Ox-Plow (Zig-Zag)
+// Sweeps a zig-zag pattern across the mesh, naturally skipping blocked cores.
+// When combined with the Peak (Mountain) array from make_pairs, the heaviest 
+// nodes naturally land in the physical center of the swept area (The Star).
+vector<pair<Core*, Core*>> find_compact_mapping(int numPairs, int mark) {
+    vector<pair<Core*, Core*>> best_target_cores;
+    int min_oxplow_steps = 1e9; // Tracks the tightest/smallest footprint
+
+    if (numPairs == 0) return best_target_cores;
+
+    // Determine the optimal width for our sweep to keep the shape box-like
+    int w = ceil(sqrt(numPairs));
+    if (w > Gw) w = Gw; // Clamp to chip width
+
+    // Search across valid Z layers (0 and 2 for Gh=4)
+    for (int z = 0; z < Gh - 1; z += 2) {
+        
+        // Try every single (cx, cy) on the mesh as a starting point
+        for (int cy = 0; cy < Gl; ++cy) {
+            for (int cx = 0; cx < Gw; ++cx) {
+                
+                vector<pair<Core*, Core*>> current_target_cores;
+                int steps = 0;
+                
+                // Sweep in an ox-plow (zig-zag) pattern starting from (cx, cy)
+                // We sweep downwards, bounding our horizontal width by 'w'
+                for (int dy = 0; current_target_cores.size() < numPairs && (cy + dy) < Gl; ++dy) {
+                    for (int dx_idx = 0; dx_idx < w && current_target_cores.size() < numPairs; ++dx_idx) {
+                        
+                        // Zig-Zag logic: L-to-R on even rows, R-to-L on odd rows
                         int dx = (dy % 2 == 0) ? dx_idx : (w - 1 - dx_idx);
                         
-                        Core* c1 = &mesh[x + dx][y + dy][z];
-                        Core* c2 = &mesh[x + dx][y + dy][z + 1];
+                        int curr_x = cx + dx;
+                        int curr_y = cy + dy;
                         
-                        if (c1->isFree && c1->isnotBlocked && c2->isFree && c2->isnotBlocked) {
-                            target_cores.push_back({c1, c2});
-                            valid_pairs++;
-                            if (valid_pairs == numPairs) break; 
-                        } else {
-                            region_free = false; 
+                        steps++; // Every tile we check (even if blocked) expands our physical footprint
+                        
+                        // Ensure we are inside the physical chip boundaries
+                        if (curr_x >= 0 && curr_x < Gw && curr_y >= 0 && curr_y < Gl) {
+                            Core* c1 = &mesh[curr_x][curr_y][z];
+                            Core* c2 = &mesh[curr_x][curr_y][z + 1];
+                            
+                            // Adaptive: Only map to it if it's completely free
+                            if (c1->isFree && c1->isnotBlocked && c2->isFree && c2->isnotBlocked) {
+                                current_target_cores.push_back({c1, c2});
+                            }
                         }
                     }
-                    if (valid_pairs == numPairs) break;
                 }
                 
-                if (region_free && valid_pairs == numPairs) {
-                    return target_cores; 
+                // If we successfully found enough pairs, see if it is the tightest footprint so far
+                if (current_target_cores.size() == numPairs) {
+                    if (steps < min_oxplow_steps) {
+                        min_oxplow_steps = steps;
+                        best_target_cores = current_target_cores;
+                    }
                 }
             }
         }
     }
-    
-    // Fallback
-    target_cores.clear();
+
+    // Return the most compact Ox-Plow shape we found on the chip
+    if (!best_target_cores.empty()) {
+        return best_target_cores;
+    }
+
+    // --- FALLBACK ---
+    // Only triggers if the entire chip is genuinely out of space
+    best_target_cores.clear();
     int st_pt = calculate_starting_point(numPairs, mark);
     if (st_pt != -1) {
         for (int i = st_pt; i < st_pt + numPairs; i++) {
-            target_cores.push_back(brickVector[i]);
+            best_target_cores.push_back(brickVector[i]);
         }
     }
     
-    return target_cores;
+    return best_target_cores;
 }
+
 
 int mapping_application(vector<pair<int, int>> pairs, int appId, Application app, int mark)
 {

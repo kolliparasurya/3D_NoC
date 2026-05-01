@@ -111,8 +111,8 @@ ofstream mapFile("./mapping/mapFile.txt");
 #define W_MIN 0.4
 #define C1 2.0      // Cognitive coefficient
 #define C2 2.0      // Social coefficient
-#define ITER_MAX 10//50 // Max iterations for PSO
-#define POP_SIZE 6//20 // Particle population size
+#define ITER_MAX 25//50 // Max iterations for PSO
+#define POP_SIZE 4//20 // Particle population size
 #define DIVERSITY_THRESHOLD 0.1
 
 // --- Helper Structs for PSO ---
