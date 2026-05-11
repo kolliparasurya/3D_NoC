@@ -19,21 +19,21 @@
 #define DEFAULT_VERBOSE_MODE                    VERBOSE_OFF
 #define DEFAULT_TRACE_MODE                      false
 #define DEFAULT_TRACE_FILENAME                  ""
-#define DEFAULT_MESH_DIM_X                      8//4
+#define DEFAULT_MESH_DIM_X                      16//4
 #define DEFAULT_MESH_DIM_Y                      8//4
 #define DEFAULT_MESH_DIM_Z                      4//2	//Default Number MESH_DIM_Z
 #define DEFAULT_NUM_VC                          8//2//1	//Default VC Number
-#define DEFAULT_BUFFER_DEPTH                    8
+#define DEFAULT_BUFFER_DEPTH                    16
 #define DEFAULT_MAX_PACKET_SIZE                 8
 #define DEFAULT_MIN_PACKET_SIZE                 8
 #define DEFAULT_ROUTING_ALGORITHM               ROUTING_FULLY_ADAPTIVE//ROUTING_ZXY//ROUTING_XYZ  
 #define DEFAULT_ROUTING_TABLE_FILENAME          ""
 #define DEFAULT_SELECTION_STRATEGY              SEL_THERMAL//SEL_BUFFER_LEVEL//SEL_NOP //SEL_RANDOM
-#define DEFAULT_PACKET_INJECTION_RATE           1.0//0.001
-#define DEFAULT_PROBABILITY_OF_RETRANSMISSION   1.0//0.001
+#define DEFAULT_PACKET_INJECTION_RATE           0.001//1.0//0.001
+#define DEFAULT_PROBABILITY_OF_RETRANSMISSION   0.001//1.0//0.001
 #define DEFAULT_TRAFFIC_DISTRIBUTION            TRAFFIC_TABLE_BASED//TRAFFIC_RANDOM
 #define DEFAULT_TRAFFIC_TABLE_FILENAME          "traffic.txt"
-#define DEFAULT_RESET_TIME                      3
+#define DEFAULT_RESET_TIME                      2
 #define DEFAULT_SIMULATION_TIME                 10000
 #define DEFAULT_STATS_WARM_UP_TIME              DEFAULT_RESET_TIME
 #define DEFAULT_DETAILED                        false
@@ -41,7 +41,7 @@
 #define DEFAULT_MAX_VOLUME_TO_BE_DRAINED        0
 // MODIFY BY HUI-SHUN
 #define DEFAULT_DW_LAYER_SEL                    DW_BL
-#define DEFAULT_DOWN_LEVEL                      1//3
+#define DEFAULT_DOWN_LEVEL                      3
 #define DEFAULT_THROTTLING_TYPE                 THROT_VERTICAL//THROT_NORMAL
 #define DEFAULT_THROTTLING_RATIO                0.2//0
 #define DEFAULT_VERTICAL_LINK                   VERTICAL_MESH

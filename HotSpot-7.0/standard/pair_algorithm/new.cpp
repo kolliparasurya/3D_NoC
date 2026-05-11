@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <deque> // Added for deque
+#include <chrono>
 
 #include "thermal_simulator.h"
 
@@ -17,9 +18,9 @@ using namespace std;
 using namespace tinyxml2;
 
 #define SATURATION_THRESHOLD 1000
-#define PIR 0.002//0.0005 // 0.001 //1.0
+#define PIR 0.001//0.002//0.0005 // 0.001 //1.0
 int TEMP_THRESHOLD = 6000;
-const int Gw = 8;
+const int Gw = 16;
 const int Gl = 8;
 const int Gh = 4;
 const int NUNITS = 30;
@@ -566,6 +567,7 @@ void loadNodes()
 
 vector<pair<int, int>> make_pairs(Application app)
 {
+    auto start_time = chrono::high_resolution_clock::now();
     vector<pair<int, int>> pairs;
     vector<int> tasks(app.tasks.size(), 0);
     set<pair<double, int>, greater<pair<double, int>>> orderedEdges;
@@ -617,99 +619,100 @@ vector<pair<int, int>> make_pairs(Application app)
         return grav_a > grav_b;
     });
 
-    // 5. THE UNIVERSAL LINK: Bi-Directional Pipeline Building
-    // Builds the pipeline outward from both the head and the tail. 
-    // This perfectly centers the heaviest gravity nodes for blackscholes
-    // while maintaining strict 1-hop physical adjacency for ferret.
+   // 5. THE CORE-GRAVITY CLUSTER: Whole-Cluster Affinity
+    // Precompute traffic between all pairs to build a dense, gravity-bound cluster.
+    // This solves multi-hub dense graphs like 'vips' without breaking pipelines.
     if (!pairs.empty())
     {
-        deque<pair<int, int>> bi_chain;
-        vector<bool> visited(pairs.size(), false);
+        int n_pairs = pairs.size();
+        
+        // 5A. Fast Precomputation Matrix
+        vector<vector<double>> pair_traffic(n_pairs, vector<double>(n_pairs, 0.0));
+        
+        for (int i = 0; i < n_pairs; i++) {
+            for (int j = i + 1; j < n_pairs; j++) {
+                double vol = 0;
+                for (size_t e = 0; e < app.edges.size(); e++) {
+                    int u = app.edges[e][0], v = app.edges[e][1];
+                    double w = app.communicationVolume[e];
+                    
+                    bool u_in_i = (u == pairs[i].first || u == pairs[i].second);
+                    bool v_in_i = (v == pairs[i].first || v == pairs[i].second);
+                    bool u_in_j = (u == pairs[j].first || u == pairs[j].second);
+                    bool v_in_j = (v == pairs[j].first || v == pairs[j].second);
+                    
+                    // If the edge bridges Pair i and Pair j
+                    if ((u_in_i && v_in_j) || (u_in_j && v_in_i)) {
+                        vol += w;
+                    }
+                }
+                pair_traffic[i][j] = vol;
+                pair_traffic[j][i] = vol; // Symmetric
+            }
+        }
 
-        // Seed the center of the pipeline with the absolute heaviest hub
-        bi_chain.push_back(pairs[0]);
+        // 5B. Center-Out Cluster Builder
+        vector<pair<int, int>> clustered_pairs(n_pairs);
+        vector<bool> visited(n_pairs, false);
+
+        int mid = n_pairs / 2;
+        clustered_pairs[mid] = pairs[0]; // Seed the heaviest node in the center
         visited[0] = true;
 
-        for (size_t i = 1; i < pairs.size(); i++)
+        int left_idx = mid - 1;
+        int right_idx = mid + 1;
+        bool place_left = true;
+
+        for (int step = 1; step < n_pairs; step++)
         {
             int best_idx = -1;
             double max_comm = -1.0;
-            bool add_to_head = false;
-            
-            pair<int, int> current_head = bi_chain.front();
-            pair<int, int> current_tail = bi_chain.back();
 
-            // Find the pair that communicates most with EITHER the head or the tail
-            for (size_t j = 0; j < pairs.size(); j++)
+            // Find the unvisited pair with the highest total traffic to ALL visited pairs
+            for (int j = 0; j < n_pairs; j++)
             {
                 if (!visited[j])
                 {
-                    double comm_with_head = 0;
-                    double comm_with_tail = 0;
-
-                    for (size_t e = 0; e < app.edges.size(); e++)
+                    double comm_with_cluster = 0;
+                    for (int k = 0; k < n_pairs; k++)
                     {
-                        int u = app.edges[e][0], v = app.edges[e][1];
-                        double vol = app.communicationVolume[e];
-
-                        // Check head connections
-                        bool head_has_node = (u == current_head.first || u == current_head.second);
-                        bool head_has_node_rev = (v == current_head.first || v == current_head.second);
-                        bool j_has_node = (v == pairs[j].first || v == pairs[j].second);
-                        bool j_has_node_rev = (u == pairs[j].first || u == pairs[j].second);
-
-                        if ((head_has_node && j_has_node) || (head_has_node_rev && j_has_node_rev)) {
-                            comm_with_head += vol;
-                        }
-
-                        // Check tail connections
-                        bool tail_has_node = (u == current_tail.first || u == current_tail.second);
-                        bool tail_has_node_rev = (v == current_tail.first || v == current_tail.second);
-
-                        if ((tail_has_node && j_has_node) || (tail_has_node_rev && j_has_node_rev)) {
-                            comm_with_tail += vol;
+                        if (visited[k]) {
+                            comm_with_cluster += pair_traffic[j][k];
                         }
                     }
 
-                    if (comm_with_head > max_comm) {
-                        max_comm = comm_with_head;
+                    if (comm_with_cluster > max_comm) {
+                        max_comm = comm_with_cluster;
                         best_idx = j;
-                        add_to_head = true;
-                    }
-                    if (comm_with_tail > max_comm) {
-                        max_comm = comm_with_tail;
-                        best_idx = j;
-                        add_to_head = false;
                     }
                 }
             }
 
-            // Fallback if no direct connections are left
-            if (best_idx == -1 || max_comm == 0)
-            {
-                for (size_t j = 0; j < pairs.size(); j++)
-                {
-                    if (!visited[j])
-                    {
-                        best_idx = j;
-                        add_to_head = false; 
-                        break;
-                    }
+            // Fallback for completely isolated nodes
+            if (best_idx == -1 || max_comm == 0) {
+                for (int j = 0; j < n_pairs; j++) {
+                    if (!visited[j]) { best_idx = j; break; }
                 }
             }
 
-            // Attach the winner to the correct end of the pipeline
-            if (add_to_head) {
-                bi_chain.push_front(pairs[best_idx]);
+            // Alternating placement to build the mountain from the center out
+            if (place_left) {
+                if (left_idx >= 0) clustered_pairs[left_idx--] = pairs[best_idx];
+                else clustered_pairs[right_idx++] = pairs[best_idx]; // Boundary safety
             } else {
-                bi_chain.push_back(pairs[best_idx]);
+                if (right_idx < n_pairs) clustered_pairs[right_idx++] = pairs[best_idx];
+                else clustered_pairs[left_idx--] = pairs[best_idx]; // Boundary safety
             }
+            
             visited[best_idx] = true;
+            place_left = !place_left;
         }
         
-        // Overwrite the raw array with the perfectly balanced bi-directional pipeline
-        pairs.assign(bi_chain.begin(), bi_chain.end());
+        pairs = clustered_pairs; // Overwrite the raw array
     }
+
+    auto end_time = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsed = end_time - start_time;
 
     return pairs;
 }
@@ -880,24 +883,151 @@ vector<pair<Core*, Core*>> find_compact_mapping(int numPairs, int mark) {
     return best_target_cores;
 }
 
-
-int mapping_application(vector<pair<int, int>> pairs, int appId, Application app, int mark)
+int mapping_application(vector<pair<int, int>> pairs, int appId, Application app, int mark, double& algo_time)
 {
-    // Call our new compact 3D bounding box mapper
+    auto start_time = chrono::high_resolution_clock::now();
+    // 1. Get the best physical slots from the Ox-Plow
     vector<pair<Core*, Core*>> target_slots = find_compact_mapping(pairs.size(), mark);
-    
+
     if (!target_slots.empty())
     {
-        // Storing -1 for the starting point since it's no longer a 1D index
-        appsLoc.push_back({-1, pairs.size()}); 
-        
-        for (size_t x = 0; x < pairs.size(); x++)
-        {
-            Core* c1 = target_slots[x].first;
-            Core* c2 = target_slots[x].second;
+        appsLoc.push_back({-1, pairs.size()});
 
-            // Core 1
-            int t1 = pairs[x].first;
+        int n_pairs = pairs.size();
+        
+        // Initial sequential mapping (The 2-Opt Optimizer will fix this rapidly)
+        vector<int> final_mapping(n_pairs);
+        for(int i = 0; i < n_pairs; i++) {
+            final_mapping[i] = i; 
+        }
+
+        // --- A. Precompute pair-to-pair traffic ---
+        vector<vector<double>> pair_traffic(n_pairs, vector<double>(n_pairs, 0.0));
+        
+        for (int i = 0; i < n_pairs; i++) {
+            for (int j = i + 1; j < n_pairs; j++) {
+                double vol = 0;
+                for (size_t e = 0; e < app.edges.size(); e++) {
+                    int u = app.edges[e][0], v = app.edges[e][1];
+                    double w = app.communicationVolume[e];
+                    
+                    bool u_in_i = (u == pairs[i].first || u == pairs[i].second);
+                    bool v_in_i = (v == pairs[i].first || v == pairs[i].second);
+                    bool u_in_j = (u == pairs[j].first || u == pairs[j].second);
+                    bool v_in_j = (v == pairs[j].first || v == pairs[j].second);
+                    
+                    if ((u_in_i && v_in_j) || (u_in_j && v_in_i)) vol += w;
+                }
+                pair_traffic[i][j] = vol;
+                pair_traffic[j][i] = vol;
+            }
+        }
+
+        // --- B. THE POST-PLACEMENT OPTIMIZER (Fast Local Search / 2-Opt) ---
+        // This mimics the global evaluation of HDPSO without the swarm latency.
+        
+        // Helper to instantly calculate total network communication cost
+        auto calculate_total_system_cost = [&]() {
+            double total_cost = 0;
+            for (int i = 0; i < n_pairs; i++) {
+                for (int j = i + 1; j < n_pairs; j++) {
+                    if (pair_traffic[i][j] > 0) {
+                        Core* c1 = target_slots[final_mapping[i]].first;
+                        Core* c2 = target_slots[final_mapping[j]].first;
+                        
+                        // Calculate exact Manhattan routing hops in 3D
+                        double dist = abs(c1->x - c2->x) + abs(c1->y - c2->y) + abs(c1->z - c2->z);
+                        total_cost += pair_traffic[i][j] * dist;
+                    }
+                }
+            }
+            return total_cost;
+        };
+
+        double current_best_cost = calculate_total_system_cost();
+        // bool improved = true;
+        // int max_passes = 20; // Safety threshold, usually converges in 3 to 6 passes
+        // int pass = 0;
+
+        // // Continuously swap pairs until the network reaches perfect equilibrium
+        // while (improved && pass < max_passes) {
+        //     improved = false;
+        //     pass++;
+            
+        //     for (int i = 0; i < n_pairs; i++) {
+        //         for (int j = i + 1; j < n_pairs; j++) {
+                    
+        //             // Tentatively swap the physical locations of Pair i and Pair j
+        //             swap(final_mapping[i], final_mapping[j]);
+                    
+        //             double new_cost = calculate_total_system_cost();
+                    
+        //             if (new_cost < current_best_cost) {
+        //                 // The swap successfully reduced the total network delay! Lock it in.
+        //                 current_best_cost = new_cost;
+        //                 improved = true;
+        //             } else {
+        //                 // The swap made things worse. Revert it.
+        //                 swap(final_mapping[i], final_mapping[j]);
+        //             }
+        //         }
+        //     }
+        // }
+        // --- C. THE POST-PLACEMENT OPTIMIZER (Fast Local Search / 2-Opt) ---
+        // OPTIMIZED: Uses Delta-Cost calculation to achieve O(N) evaluation time per swap.
+        
+        bool improved = true;
+        int max_passes = 20;
+        int pass = 0;
+
+        while (improved && pass < max_passes) {
+            improved = false;
+            pass++;
+            
+            for (int i = 0; i < n_pairs; i++) {
+                for (int j = i + 1; j < n_pairs; j++) {
+                    
+                    double cost_before = 0, cost_after = 0;
+                    Core* slot_i = target_slots[final_mapping[i]].first;
+                    Core* slot_j = target_slots[final_mapping[j]].first;
+
+                    // Calculate the traffic cost involving ONLY nodes i and j in their current positions
+                    for (int k = 0; k < n_pairs; k++) {
+                        if (k != i && k != j) {
+                            Core* slot_k = target_slots[final_mapping[k]].first;
+                            
+                            if (pair_traffic[i][k] > 0) {
+                                cost_before += pair_traffic[i][k] * (abs(slot_i->x - slot_k->x) + abs(slot_i->y - slot_k->y) + abs(slot_i->z - slot_k->z));
+                                cost_after  += pair_traffic[i][k] * (abs(slot_j->x - slot_k->x) + abs(slot_j->y - slot_k->y) + abs(slot_j->z - slot_k->z));
+                            }
+                            if (pair_traffic[j][k] > 0) {
+                                cost_before += pair_traffic[j][k] * (abs(slot_j->x - slot_k->x) + abs(slot_j->y - slot_k->y) + abs(slot_j->z - slot_k->z));
+                                cost_after  += pair_traffic[j][k] * (abs(slot_i->x - slot_k->x) + abs(slot_i->y - slot_k->y) + abs(slot_i->z - slot_k->z));
+                            }
+                        }
+                    }
+
+                    // If the cost AFTER the swap is strictly less than the cost BEFORE the swap, lock it in.
+                    if (cost_after < cost_before) {
+                        swap(final_mapping[i], final_mapping[j]);
+                        improved = true;
+                    }
+                }
+            }
+        }
+
+        auto end_time = chrono::high_resolution_clock::now();
+        chrono::duration<double> elapsed = end_time - start_time;
+        algo_time += elapsed.count(); // Accumulate the pure algorithm time
+
+        // --- C. APPLY THE PERFECT MAPPING TO NOXIM CORES ---
+        for (size_t i = 0; i < pairs.size(); i++)
+        {
+            int target_idx = final_mapping[i];
+            Core* c1 = target_slots[target_idx].first;
+            Core* c2 = target_slots[target_idx].second;
+
+            int t1 = pairs[i].first;
             c1->task_id_int = cnv_task_buf(appId, t1);
             c1->isFree = 0;
             c1->wareoff_const += app.tasks[t1];
@@ -905,16 +1035,12 @@ int mapping_application(vector<pair<int, int>> pairs, int appId, Application app
             c1->time_of_death = total_sim_time + app.runtime;
 
             int buf1 = c1->task_id_int;
-            task_timestamp[buf1].push_back({0,
-                                            c1->x + (c1->y * Gw) + (c1->z * Gw * Gl),
-                                            total_sim_time,
-                                            c1->time_of_death});
+            task_timestamp[buf1].push_back({0, c1->x + (c1->y * Gw) + (c1->z * Gw * Gl), total_sim_time, c1->time_of_death});
             avg_node_layer += c1->z;
 
-            // Core 2 (if pair exists)
-            if (pairs[x].second != -1)
+            if (pairs[i].second != -1)
             {
-                int t2 = pairs[x].second;
+                int t2 = pairs[i].second;
                 c2->task_id_int = cnv_task_buf(appId, t2);
                 c2->isFree = 0;
                 c2->wareoff_const += app.tasks[t2];
@@ -922,10 +1048,7 @@ int mapping_application(vector<pair<int, int>> pairs, int appId, Application app
                 c2->time_of_death = total_sim_time + app.runtime;
 
                 int buf2 = c2->task_id_int;
-                task_timestamp[buf2].push_back({0,
-                                                c2->x + (c2->y * Gw) + (c2->z * Gw * Gl),
-                                                total_sim_time,
-                                                c2->time_of_death});
+                task_timestamp[buf2].push_back({0, c2->x + (c2->y * Gw) + (c2->z * Gw * Gl), total_sim_time, c2->time_of_death});
                 avg_node_layer += c2->z;
             }
         }
@@ -933,7 +1056,7 @@ int mapping_application(vector<pair<int, int>> pairs, int appId, Application app
         return 1;
     }
     cout << "0r ";
-    return 0; // Failed to map (chip is entirely full)
+    return 0; // Failed to map
 }
 
 // int mapping_application(vector<pair<int, int>> pairs, int appId, Application app, int mark)
@@ -1101,7 +1224,7 @@ void free_mesh()
                 }
 }
 
-void pair_algorithm()
+void pair_algorithm(double& algo_time)
 {
     int cnt = 0;
     while (cnt < apps.size())
@@ -1121,7 +1244,7 @@ void pair_algorithm()
                 s = (ans) ? ((Gh * Gw * Gl) - extra) / 4 : 0;
 
                 vector<pair<int, int>> pairs = make_pairs(apps[i]);
-                int zick = mapping_application(pairs, apps[i].id, apps[i], cnt); // Use real ID
+                int zick = mapping_application(pairs, apps[i].id, apps[i], cnt, algo_time); // Use real ID
                 if (zick)
                 {
                     cout << "Mapped Application No: " << apps[i].id << " " << apps[i].tasks.size() << endl;
@@ -1257,19 +1380,21 @@ int main(int argc, char *argv[])
     //     TEMP_THRESHOLD = 4500;
     // else
     //     TEMP_THRESHOLD = 5500;
+    double algorithm_time_only = 0.0;
+    
     graphsUpdating(argc, argv);
     initiate();
     loadNodes();
     extra = (Gh % 2 == 0) ? 0 : Gw * Gl;
 
     thermal_initiation();
-    auto start = chrono::high_resolution_clock::now();
+    // auto start = chrono::high_resolution_clock::now();
 
-    pair_algorithm();
+    pair_algorithm(algorithm_time_only);
 
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> diff = end - start;
-    double algorithm_time_only = diff.count() - thermal_overhead_time;
+    // auto end = chrono::high_resolution_clock::now();
+    // chrono::duration<double> diff = end - start;
+    // double algorithm_time_only = diff.count() - thermal_overhead_time;
 
     // Reporting Logic using new int IDs
 
